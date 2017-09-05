@@ -1,0 +1,3 @@
+GET http://nba.api.dev/team HTTP/1.1
+Content-Type: application/json
+Accept: application/json
