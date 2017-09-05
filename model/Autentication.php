@@ -30,7 +30,7 @@ class Autentication
 
     public static function verify() {
         if (!Autentication::vefiry())
-            throw new ignatureInvalidException("Pasword verification failed");
+            throw new SignatureInvalidException("Pasword verification failed");
     }
 
     /**
