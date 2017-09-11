@@ -22,7 +22,7 @@ class ConnectHandlerModel
         $db = DatabaseModel::getInstance();
         $db_connection = $db->getConnection();
 
-        if ($user != null) {
+        if ($user != null) { 
             $query = "SELECT * FROM " . \ConsDB\ConsConnection::TABLA_NAME . " WHERE "
                 . \ConsDB\ConsConnection::NAME_USER . "=?";
 
@@ -61,9 +61,17 @@ class ConnectHandlerModel
 
             $user = new User($user, "deconocido", $user,
                 ConnectHandlerModel::UNKNOWN, $user.'@gmail.com', 0);
+            
             $roll = new Roll("GoogleUser", "A user from Google");
+            
+            //Indentificador de un usuario de Google
             $roll->setId(2);
+            
             $user->setRoll($roll);
+            //Recoge el ultimo id de la base de datos, para que las tablas esten relacionadas
+            // los usuarios deben tener el mismo id.
+            $user->setId(mysql_insert_id());
+            
             //Se introduce el usuario en la base de datos
             UserHandlerModel::setUser($user);
 

@@ -1,5 +1,7 @@
 <?php
 
+use ConsDB\ConsUser;
+
 /**
  * Created by PhpStorm.
  * User: adripol94
@@ -17,7 +19,7 @@ class UserHandlerModel
 
     public static function setUser(User $user)
     {
-        $code = null;
+        $userId = null;
 
         if ($user != null) {
 
@@ -26,7 +28,7 @@ class UserHandlerModel
                 $user->setPassword(Security::encode_Hash($user->getPassword()));
             } catch (Exception $e) {
                 //Todo mejorar esto;
-                return $code;
+                return $userId;
             }
 
             $db = DatabaseModel::getInstance();
@@ -46,11 +48,14 @@ class UserHandlerModel
 
             $ready = $prepare_query->execute();
 
-            if ($ready) {
-                $code = '200';
+            if (!$ready) {
+                throw new ErrorException($prepare_query->error);
             }
+            
+            $userId = mysql_insert_id();
+            
         }
-        return $code;
+        return $userId;
     }
 
     public static function getUserById($id) {
@@ -88,7 +93,7 @@ class UserHandlerModel
                 $res = $listUser;
             }
 
-            //$prepare_query->close();
+            $prepare_query->close();
         }
 
         return $res;
@@ -129,6 +134,33 @@ class UserHandlerModel
             }
         }
         return $user[0];
+    }
+    
+    public function getUserByUser($user) {
+        $userObj = null;
+        
+        if ($user != null) {
+            $db = DatabaseModel::getInstance();
+            $db_connection = $db->getConnection();
+            
+            $query = "SELECT * FROM " . \ConsDB\ConsUser::NAME_TABLE . " WHERE "
+                . \ConsDB\ConsUser::USER . "=?";
+            $prepare_query = $db_connection->prepare($query);
+            $prepare_query->bind_param("s", $user);
+            $prepare_query->execute();
+            $prepare_query->bind_result($id, $email, $name, $surname, $age, $user, $password, $roll);
+            $prepare_query->fetch();
+            
+            try {
+                $userObj = new User($user, $password, $surname, $name, $email, $age);
+                $userObj->setId((int)$id);
+                
+                //$prepare_query->close();
+            } catch (ErrorException $e) {
+                throw new ErrorException("No se encontro el usuario");
+            }
+        }
+        return $userObj;
     }
 
     public static function getUserByPass($pass) {
